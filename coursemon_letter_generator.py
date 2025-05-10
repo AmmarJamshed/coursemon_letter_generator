@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
-
-
 import streamlit as st
 from docx import Document
 from docx.shared import Inches
 from datetime import date
 import openai
-import os
 
 # -------------------
 # App Setup
@@ -17,8 +13,12 @@ import os
 st.image("coursemon_pic_logo.jpg", width=150)
 st.title("📄 Coursemon Letter Generator")
 
-# OpenAI API Key Input (Secure)
-openai.api_key = st.text_input("🔑 Enter your OpenAI API Key", type="password")
+# Use API key from secrets
+if "openai" not in st.secrets:
+    st.error("❌ OpenAI API Key not found in secrets.")
+    st.stop()
+
+openai.api_key = st.secrets["openai"]["api_key"]
 
 # Inputs
 letter_type = st.selectbox("Letter Type", ["Employment Letter", "Business Proposal", "Notice Letter"])
@@ -41,7 +41,7 @@ Include equity offering of {equity}% only if it's an Employment Letter.
 Tone should be professional and warm. End the letter with:
 "Ammar Jamshed, Founder & CEO, Coursemon"
     """
-    
+
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
@@ -57,33 +57,29 @@ Tone should be professional and warm. End the letter with:
 # Generate Letter
 # -------------------
 if st.button("Generate Letter with GPT"):
-    if not openai.api_key:
-        st.warning("Please enter your OpenAI API Key to proceed.")
-    else:
-        with st.spinner("Generating letter with GPT..."):
-            letter_text = get_letter_from_gpt(letter_type, name, position, equity, letter_date)
+    with st.spinner("Generating letter with GPT..."):
+        letter_text = get_letter_from_gpt(letter_type, name, position, equity, letter_date)
 
-            doc = Document()
-            doc.add_picture("coursemon_pic_logo.jpg", width=Inches(1.5))
-            doc.add_paragraph()
-            doc.add_paragraph("COURSEMON", style='Title')
-            doc.add_paragraph("Empowering Learning Journeys", style='Intense Quote')
-            doc.add_paragraph()
-            doc.add_paragraph(f"Date: {letter_date.strftime('%B %d, %Y')}")
-            doc.add_paragraph(f"To:\n{name}\n{email}")
-            doc.add_paragraph()
-            doc.add_paragraph(f"Subject: {letter_type} for {position}", style='Heading 2')
-            doc.add_paragraph(letter_text)
+        doc = Document()
+        doc.add_picture("coursemon_pic_logo.jpg", width=Inches(1.5))
+        doc.add_paragraph()
+        doc.add_paragraph("COURSEMON", style='Title')
+        doc.add_paragraph("Empowering Learning Journeys", style='Intense Quote')
+        doc.add_paragraph()
+        doc.add_paragraph(f"Date: {letter_date.strftime('%B %d, %Y')}")
+        doc.add_paragraph(f"To:\n{name}\n{email}")
+        doc.add_paragraph()
+        doc.add_paragraph(f"Subject: {letter_type} for {position}", style='Heading 2')
+        doc.add_paragraph(letter_text)
 
-            file_name = f"{name.replace(' ', '_')}_{letter_type.replace(' ', '_')}_Coursemon_Letter.docx"
-            doc.save(file_name)
+        file_name = f"{name.replace(' ', '_')}_{letter_type.replace(' ', '_')}_Coursemon_Letter.docx"
+        doc.save(file_name)
 
-            with open(file_name, "rb") as f:
-                st.success("✅ Letter Ready!")
-                st.download_button(
-                    label="📥 Download Letter",
-                    data=f,
-                    file_name=file_name,
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                )
-
+        with open(file_name, "rb") as f:
+            st.success("✅ Letter Ready!")
+            st.download_button(
+                label="📥 Download Letter",
+                data=f,
+                file_name=file_name,
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
