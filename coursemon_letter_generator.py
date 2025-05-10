@@ -42,7 +42,7 @@ Tone should be professional and warm. End the letter with:
 "Ammar Jamshed, Founder & CEO, Coursemon"
     """
 
-    response = openai.ChatCompletion.create(
+    response = openai.Chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful assistant that writes formal letters for a startup."},
@@ -51,7 +51,9 @@ Tone should be professional and warm. End the letter with:
         temperature=0.7,
         max_tokens=600
     )
-    return response["choices"][0]["message"]["content"]
+
+    return response.choices[0].message.content
+
 
 # -------------------
 # Generate Letter
