@@ -85,16 +85,31 @@ if st.button("Generate Letter with GPT"):
         letter_text = get_letter_from_gpt(letter_type, name, position, equity, letter_date, include_equity)
 
         doc = Document()
-        doc.add_picture("coursemon_pic_logo.jpg", width=Inches(1.5))
-        doc.add_paragraph()
-        doc.add_paragraph("COURSEMON", style='Title')
-        doc.add_paragraph("Empowering Learning Journeys", style='Intense Quote')
-        doc.add_paragraph()
+
+        # Simulated Header
+        header_table = doc.add_table(rows=1, cols=2)
+        hdr_cells = header_table.rows[0].cells
+        hdr_cells[0].paragraphs[0].add_run().add_picture("coursemon_pic_logo.jpg", width=Inches(1.2))
+        hdr_cells[1].text = "Coursemon\nEmpowering Learning Journeys"
+        header_table.style = 'Table Grid'
+
+        doc.add_paragraph()  # Spacer
+
         doc.add_paragraph(f"Date: {letter_date.strftime('%B %d, %Y')}")
         doc.add_paragraph(f"To:\n{name}\n{email}")
         doc.add_paragraph()
         doc.add_paragraph(f"Subject: {letter_type} for {position}", style='Heading 2')
         doc.add_paragraph(letter_text)
+        doc.add_paragraph()  # Spacer
+
+        # Simulated Footer
+        doc.add_paragraph("Warm regards,")
+        doc.add_paragraph("Ammar Jamshed")
+        doc.add_paragraph("Co-Founder & CEO, Coursemon")
+        doc.add_paragraph("WhatsApp: 03412917004")
+        doc.add_paragraph("https://coursemon.net")
+        doc.add_paragraph("NED University, University Road, NIC Karachi")
+
 
         file_name = f"{name.replace(' ', '_')}_{letter_type.replace(' ', '_')}_Coursemon_Letter.docx"
         doc.save(file_name)
